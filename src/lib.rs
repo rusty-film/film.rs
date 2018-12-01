@@ -1,5 +1,9 @@
 #[cfg(test)]
 mod tests {
+    use std::io::{Cursor, Read, Write};
+    use std::sync::{Arc, Mutex};
+    use std::thread;
+
     #[test]
     fn base_system_in_all_is_unwrap() {
         let mut input = Cursor::new(vec!['H' as u8, 'i' as u8]);
