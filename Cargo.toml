@@ -4,4 +4,3 @@ version = "0.1.0"
 authors = ["Keishi Kawada <megumish@exploitouri.st>"]
 
 [dependencies]
-stainless = { path = "." }
