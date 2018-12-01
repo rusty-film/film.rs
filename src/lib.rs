@@ -27,7 +27,7 @@ mod tests {
         {
             let output = output.clone();
             let output = output.lock().unwrap();
-            assert_eq!(std::str::from_uft8(output.get_ref()).unwrap(), "Hi");
+            assert_eq!(std::str::from_utf8(output.get_ref()).unwrap(), "Hi");
         }
     }
 }
