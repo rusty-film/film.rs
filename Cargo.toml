@@ -2,5 +2,6 @@
 name = "stainless"
 version = "0.1.0"
 authors = ["Keishi Kawada <megumish@exploitouri.st>"]
+editions = "2018"
 
 [dependencies]
