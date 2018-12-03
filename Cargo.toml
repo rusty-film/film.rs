@@ -5,3 +5,4 @@ authors = ["Keishi Kawada <megumish@exploitouri.st>"]
 editions = "2018"
 
 [dependencies]
+failure = "0.1.3"
