@@ -1,8 +1,14 @@
 [package]
 name = "film"
-version = "0.1.0"
+version = "0.0.1"
 authors = ["Keishi Kawada <megumish@exploitouri.st>"]
 editions = "2018"
+readme = "README.md"
+description = "Library Providing I/O Model for Rust"
+license = "MIT/Apache-2.0"
+repository = "https://github.com/rusty-film/film.rs"
+keywords = ["io"]
+categories = ["io", "async"]
 
 [dependencies]
 failure = "0.1.3"
