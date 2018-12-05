@@ -1,4 +1,5 @@
 #[macro_use] extern crate failure;
+#[macro_use] extern crate lazy_static;
 
 #[cfg(test)]
 mod tests {
@@ -69,10 +70,9 @@ mod tests {
         }
     }
 
-    pub fn event(mut input: impl Read, output: Arc<Mutex<impl Write>>) -> Result<(), Error> {
+    pub fn event(mut input: impl Read, mut output: impl Write) -> Result<(), Error> {
         let mut data = vec![0; 2];
         assert_eq!(input.read(&mut data)?, 2);
-        let mut output = output.lock().expect("Can't lock");
         let data = data;
         assert_eq!(output.write(&data)?, 2);
         Ok(())
@@ -80,23 +80,27 @@ mod tests {
 
     #[test]
     fn base_system_in_all_is_unwrap() -> Result<(), Error> {
-        let mut input = Cursor::new(vec!['H' as u8, 'i' as u8]);
-        let output = Arc::new(Mutex::new(Cursor::new(Vec::new())));
-
-        {
-            let output = output.clone();
-
-            let handle = thread::spawn(move || {
-                event(input, output)
-            });
-            handle.join().unwrap()?;
+        lazy_static! {
+            static ref PSEUDO_IN:  Vec<u8> = {
+                let input = vec!['H' as u8, 'i' as u8];
+                input
+            };
+            static ref PSEUDO_OUT: Mutex<Vec<u8>> = {
+                let mut output = Mutex::new(Vec::new());
+                output
+            };
         }
 
-        {
-            let output = output.clone();
-            let output = output.lock().unwrap();
-            assert_eq!(std::str::from_utf8(output.get_ref()).unwrap(), "Hi");
-        }
+        let handle = thread::spawn(move || {
+            let input = Cursor::new(&*PSEUDO_IN);
+            let mut output = PSEUDO_OUT.lock().unwrap();
+            let output = Cursor::new(&mut *output);
+            event(input, output)
+        });
+        handle.join().unwrap()?;
+
+        let output = PSEUDO_OUT.lock().unwrap();
+        assert_eq!(std::str::from_utf8(&*output).unwrap(), "Hi");
         Ok(())
     }
 }
