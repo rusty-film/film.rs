@@ -33,7 +33,7 @@ mod tests {
 
         let handle = thread::spawn(move || {
             let input = Cursor::new(&*PSEUDO_IN);
-            let mut output = PSEUDO_OUT.lock().expect("Must be to be locked");
+            let mut output = PSEUDO_OUT.lock().expect("Must be locked");
             let output = Cursor::new(&mut *output);
             event(input, output)
         });
@@ -41,7 +41,7 @@ mod tests {
             .join()
             .map_err(|_| failure::err_msg("Thread Error"))??;
 
-        let output = PSEUDO_OUT.lock().expect("Must be to be locked");
+        let output = PSEUDO_OUT.lock().expect("Must be locked");
         assert_eq!(std::str::from_utf8(&*output)?, "Hi");
         Ok(())
     }
