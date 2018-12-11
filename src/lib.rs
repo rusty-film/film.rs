@@ -1,5 +1,4 @@
 #[cfg(test)]
-#[macro_use]
 extern crate failure;
 #[cfg(test)]
 #[macro_use]
@@ -27,7 +26,7 @@ mod tests {
                 input
             };
             static ref PSEUDO_OUT: Mutex<Vec<u8>> = {
-                let mut output = Mutex::new(Vec::new());
+                let output = Mutex::new(Vec::new());
                 output
             };
         }
