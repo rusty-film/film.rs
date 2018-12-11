@@ -19,7 +19,7 @@ mod tests {
     }
 
     #[test]
-    fn base_system_in_all_is_unwrap() -> Result<(), failure::Error> {
+    fn base_system_in_all() -> Result<(), failure::Error> {
         lazy_static! {
             static ref PSEUDO_IN: Vec<u8> = {
                 let input = vec!['H' as u8, 'i' as u8];
@@ -33,14 +33,16 @@ mod tests {
 
         let handle = thread::spawn(move || {
             let input = Cursor::new(&*PSEUDO_IN);
-            let mut output = PSEUDO_OUT.lock().unwrap();
+            let mut output = PSEUDO_OUT.lock().expect("Must be to be locked");
             let output = Cursor::new(&mut *output);
             event(input, output)
         });
-        handle.join().unwrap()?;
+        handle
+            .join()
+            .map_err(|_| failure::err_msg("Thread Error"))??;
 
-        let output = PSEUDO_OUT.lock().unwrap();
-        assert_eq!(std::str::from_utf8(&*output).unwrap(), "Hi");
+        let output = PSEUDO_OUT.lock().expect("Must be to be locked");
+        assert_eq!(std::str::from_utf8(&*output)?, "Hi");
         Ok(())
     }
 }
