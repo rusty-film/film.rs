@@ -19,7 +19,7 @@ mod tests {
     }
 
     #[test]
-    fn base_system_in_all() -> Result<(), failure::Error> {
+    fn base_system() -> Result<(), failure::Error> {
         lazy_static! {
             static ref PSEUDO_IN: Vec<u8> = {
                 let input = vec!['H' as u8, 'i' as u8];
