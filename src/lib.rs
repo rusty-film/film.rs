@@ -1,76 +1,13 @@
-#[macro_use] extern crate failure;
-#[macro_use] extern crate lazy_static;
+#[macro_use]
+extern crate lazy_static;
 
 #[cfg(test)]
 mod tests {
-    use failure::{Backtrace, Context, Fail};
-    use std::fmt::{self, Display};
-    use std::io::{self, Cursor, Read, Write};
-    use std::sync::{self, Arc, Mutex};
+    use std::io::{Cursor, Read, Write};
+    use std::sync::Mutex;
     use std::thread;
 
-    #[derive(Fail, Debug)]
-    pub enum ErrorKind {
-        #[fail(display = "IO error")]
-        Io,
-        #[fail(display = "Sync error")]
-        Sync,
-    }
-
-    #[derive(Debug)]
-    pub struct Error {
-        inner: Context<ErrorKind>,
-    }
-
-    impl Fail for Error {
-        fn cause(&self) -> Option<&Fail> {
-            self.inner.cause()
-        }
-
-        fn backtrace(&self) -> Option<&Backtrace> {
-            self.inner.backtrace()
-        }
-    }
-
-    impl Display for Error {
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            Display::fmt(&self.inner, f)
-        }
-    }
-
-    impl Error {
-        pub fn new(inner: Context<ErrorKind>) -> Error {
-            Error { inner }
-        }
-
-        pub fn kind(&self) -> &ErrorKind {
-            self.inner.get_context()
-        }
-    }
-
-    impl From<ErrorKind> for Error {
-        fn from(kind: ErrorKind) -> Error {
-            Error {
-                inner: Context::new(kind),
-            }
-        }
-    }
-
-    impl From<Context<ErrorKind>> for Error {
-        fn from(inner: Context<ErrorKind>) -> Error {
-            Error { inner }
-        }
-    }
-
-    impl From<io::Error> for Error {
-        fn from(error: io::Error) -> Error {
-            Error {
-                inner: error.context(ErrorKind::Io),
-            }
-        }
-    }
-
-    pub fn event(mut input: impl Read, mut output: impl Write) -> Result<(), Error> {
+    pub fn event(mut input: impl Read, mut output: impl Write) -> Result<(), failure::Error> {
         let mut data = vec![0; 2];
         assert_eq!(input.read(&mut data)?, 2);
         let data = data;
@@ -79,9 +16,9 @@ mod tests {
     }
 
     #[test]
-    fn base_system_in_all_is_unwrap() -> Result<(), Error> {
+    fn base_system_in_all_is_unwrap() -> Result<(), failure::Error> {
         lazy_static! {
-            static ref PSEUDO_IN:  Vec<u8> = {
+            static ref PSEUDO_IN: Vec<u8> = {
                 let input = vec!['H' as u8, 'i' as u8];
                 input
             };
