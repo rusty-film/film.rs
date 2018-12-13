@@ -59,7 +59,7 @@ mod tests {
         W: Write,
     {
         enter: &'a mut R,
-        func: Option<&'a Fn(&mut u8)>,
+        func: Vec<&'a Fn(&mut u8)>,
         exit: &'a mut W,
     }
 
@@ -71,7 +71,7 @@ mod tests {
         fn new(enter: &'a mut R, exit: &'a mut W) -> Self {
             PseudoEnterExit {
                 enter,
-                func: None,
+                func: Vec::new(),
                 exit,
             }
         }
@@ -84,10 +84,11 @@ mod tests {
     {
         type InUnit = u8;
 
-        fn for_each(self, func: &'a Fn(&mut Self::InUnit)) -> Self {
+        fn for_each(mut self, func: &'a Fn(&mut Self::InUnit)) -> Self {
+            self.func.push(func);
             PseudoEnterExit {
                 enter: self.enter,
-                func: Some(func),
+                func: self.func,
                 exit: self.exit,
             }
         }
@@ -95,7 +96,7 @@ mod tests {
         fn single_run(&mut self) -> Result<(), failure::Error> {
             let mut buf = [0; 1];
             while let Ok(1) = self.enter.read(&mut buf) {
-                if let Some(func) = self.func {
+                for func in &self.func {
                     buf.iter_mut().for_each(func);
                 }
                 self.exit.write(&buf)?;
@@ -130,11 +131,12 @@ mod tests {
                 fn double<'tmp>(x: &'tmp mut u8) {
                     *x *= 2u8;
                 }
-
-                let mut conn = PseudoEnterExit::new(&mut enter, &mut exit).for_each(&double);
+                let mut conn = PseudoEnterExit::new(&mut enter, &mut exit)
+                    .for_each(&double)
+                    .for_each(&double);
                 conn.single_run()?;
             }
-            assert_eq!(output, [2, 4, 6, 8]);
+            assert_eq!(output, [4, 8, 12, 16]);
         }
         Ok(())
     }
